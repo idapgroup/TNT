@@ -2,9 +2,9 @@ apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
 ext {
-    libraryName = 'rx-ktx'
+    libraryName = 'TNT'
     publishedGroupId = 'com.idapgroup'
-    artifact = libraryName
+    artifact = libraryName.toLowerCase()
 
     bintrayRepo = 'kotlin'
     bintrayName = libraryName
