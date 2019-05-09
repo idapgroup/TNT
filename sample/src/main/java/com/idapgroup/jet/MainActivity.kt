@@ -10,8 +10,7 @@ import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.idapgroup.tnt.takePhotoFromCamera
-import com.idapgroup.tnt.transform.cropCenter
-import com.idapgroup.tnt.transform.transformAsBitmap
+import com.idapgroup.tnt.transform.*
 import kotlinx.android.synthetic.main.screen_sample.*
 import java.io.File
 
@@ -43,14 +42,15 @@ class SampleFragment : Fragment() {
         Glide.with(imageView).load(uri).into(imageView)
     }
 
-    private fun take(path: File) {
-        val bitmap = path.toUri()
-            .transformAsBitmap(context!!) {
-                square(500)
-                cropCenter()
+    private fun take(file: File) {
+        imageView.setImageBitmap(
+            file.transformAsBitmap {
+                square(500, cropCenter)
+                colorFilter(100, 33, 100, 98)
+                blur(radius = 2)
+//                rotate(90f)
             }
-        Glide.with(imageView).load(bitmap).into(imageView)
+        )
+//        Glide.with(imageView).load(bitmap).into(imageView)
     }
-
-
 }
