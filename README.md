@@ -83,7 +83,7 @@ result is centered inside dst.
 * __fitEnd()__ - compute a scale that will maintain the original src aspect ratio, but will also ensure
 that src fits entirely inside dst. At least one axis (X or Y) will fit exactly. END
 aligns the result to the right and bottom edges of dst.
-* 
+
 ```kotlin
 val bitmap = someBitmap.transform {
     resize(100, 200)
