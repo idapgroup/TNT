@@ -6,9 +6,15 @@ import android.graphics.Bitmap
 import android.os.Build
 import android.renderscript.*
 
-const val DEFAULT_RADIUS = 25
-const val DEFAULT_SAMPLING = 1f
+internal const val DEFAULT_RADIUS = 25
+internal const val DEFAULT_SAMPLING = 1f
 
+/**
+ * Blur with modification of this [Bitmap] data
+ * @param radius Smoothing catch radius
+ * @param sampling factor of downscale for moment of blurring
+ * @param context if set will activate hardware blurring
+ */
 fun Bitmap.blur(
     radius: Int? = DEFAULT_RADIUS,
     sampling: Float? = DEFAULT_SAMPLING,
@@ -19,7 +25,7 @@ fun Bitmap.blur(
     }
     return when {
         sampling != null && sampling > 0 -> {
-            sampling(value = sampling) {
+            samplingBlur(sampling) {
                 radius?.let {
                     blurInner(it, context)
                 }
@@ -30,13 +36,15 @@ fun Bitmap.blur(
     }
 }
 
-private fun Bitmap.sampling(value: Float, process: Bitmap.() -> Unit): Bitmap {
-    val dstW = (width / value).toInt()
-    val dstH = (height / value).toInt()
+private fun Bitmap.samplingBlur(sampling: Float, process: Bitmap.() -> Unit): Bitmap {
+    val dstW = (width / sampling).toInt()
+    val dstH = (height / sampling).toInt()
     val downScaled = Bitmap.createScaledBitmap(this, dstW, dstH, true)
     process(downScaled)
     return Bitmap.createScaledBitmap(downScaled, width, height, true).also {
-        downScaled.recycle()
+        if (it !== downScaled) {
+            downScaled.recycle()
+        }
     }
 }
 

@@ -43,14 +43,11 @@ class SampleFragment : Fragment() {
     }
 
     private fun take(file: File) {
-        imageView.setImageBitmap(
-            file.transformAsBitmap {
-                square(500, cropCenter)
+        val bitmap = file.transformAsBitmap {
+            square(600, cropCenter)
                 colorFilter(100, 33, 100, 98)
-                blur(radius = 2)
-//                rotate(90f)
-            }
-        )
-//        Glide.with(imageView).load(bitmap).into(imageView)
+                blur(sampling = 9f, radius = 6, context = context)
+        }
+        imageView.setImageBitmap(bitmap)
     }
 }

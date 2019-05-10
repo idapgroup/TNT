@@ -5,6 +5,24 @@ import android.graphics.Bitmap.CompressFormat
 import java.io.File
 import java.io.FileOutputStream
 
+/**
+ * Decode [DataSource] as bitmap
+ */
+fun DataSource.toBitmap(): Bitmap = invoke().use(BitmapFactory::decodeStream)
+
+/**
+ * Compress this [Bitmap] in [file]
+ */
+fun Bitmap.compressTo(
+    format: CompressFormat = CompressFormat.JPEG,
+    quality: Int = 90,
+    file: File
+) {
+    FileOutputStream(file).use { stream ->
+        compress(format, quality, stream)
+    }
+}
+
 internal fun Bitmap.transform(
     size: Size,
     matrix: Matrix,
@@ -19,17 +37,6 @@ internal fun Bitmap.transform(
     }
     preDraw(canvas)
     canvas.drawBitmap(this, matrix, paint)
+    recycle()
     return bitmap
 }
-
-fun Bitmap.compressTo(
-    format: CompressFormat = CompressFormat.JPEG,
-    quality: Int = 90,
-    file: File
-) {
-    FileOutputStream(file).use { stream ->
-        compress(format, quality, stream)
-    }
-}
-
-fun DataSource.toBitmap(): Bitmap = invoke().use(android.graphics.BitmapFactory::decodeStream)

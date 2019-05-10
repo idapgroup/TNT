@@ -3,7 +3,7 @@ package com.idapgroup.tnt.transform
 import android.graphics.Matrix
 
 /**
- * Options for scaling the content of an source to the destination target.
+ * Options for scaling the content of an source to the target.
  */
 enum class ScaleType {
     /**
@@ -27,18 +27,24 @@ enum class ScaleType {
      */
     Center,
     /**
-     * Coming soon...
+     * Scale the image uniformly (maintain the image's aspect ratio) so
+     * that both dimensions (width and height) of the image will be equal
+     * to or larger than the corresponding dimension of the target .
+     * The image is then position on the start of target.
      */
     CropStart,
     /**
      * Scale the image uniformly (maintain the image's aspect ratio) so
      * that both dimensions (width and height) of the image will be equal
-     * to or larger than the corresponding dimension of the view
-     * (minus padding). The image is then centered in the view.
+     * to or larger than the corresponding dimension of the target.
+     * The image is then centered in the target.
      */
     CropCenter,
     /**
-     * Coming soon...
+     * Scale the image uniformly (maintain the image's aspect ratio) so
+     * that both dimensions (width and height) of the image will be equal
+     * to or larger than the corresponding dimension of the target.
+     * The image is then position on the end of target.
      */
     CropEnd,
 }

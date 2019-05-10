@@ -1,56 +1,37 @@
 package com.idapgroup.tnt.transform
 
 import android.graphics.*
-import com.idapgroup.tnt.transform.BitmapTransformer.*
-import androidx.annotation.IntRange as AIntRange
+import com.idapgroup.tnt.transform.MatrixTransformer.*
 
-internal typealias Transform = Attrs.() -> Attrs
+class BitmapTransformer : MatrixTransformer<BitmapTransformerAttrs>()
 
-class BitmapTransformer {
+data class BitmapTransformerAttrs(
+    internal val bitmap: Bitmap,
+    val colorFilter: PorterDuffColorFilter? = null,
+    val background: Int? = null,
+    override val matrix: Matrix = Matrix(),
+    override val size: Size = bitmap.size
+) : Attrs<BitmapTransformerAttrs> {
 
-    data class Attrs(
-        val bitmap: Bitmap,
-        val size: Size = bitmap.size,
-        val colorFilter: Int? = null,
-        val background: Int? = null,
-        val matrix: Matrix = Matrix()
-    )
-
-    private val preTransforms = mutableListOf<Transform>()
-    private val postTransforms = mutableListOf<Transform>()
-
-    internal fun preTransform(transform: Transform): BitmapTransformer {
-        preTransforms += transform
-        return this
-    }
-
-    internal fun postTransform(transform: Transform): BitmapTransformer {
-        postTransforms += transform
-        return this
-    }
-
-    internal fun transform(attrs: Attrs, block: Attrs.() -> Attrs): Attrs {
-        val preAttrs = preTransforms.fold(attrs)
-        return postTransforms.fold(block(preAttrs))
-    }
-
-    private fun List<Transform>.fold(initial: Attrs): Attrs =
-        fold(initial) { acc, op -> op(acc) }
+    override fun modify(matrix: Matrix, size: Size): BitmapTransformerAttrs =
+        copy(matrix = matrix, size = size)
 }
 
-fun Bitmap.transform(matrix: Matrix = Matrix(), config: BitmapTransformer.() -> Unit): Bitmap {
+internal fun Bitmap.transform(
+    matrix: Matrix = Matrix(),
+    config: BitmapTransformer.() -> Unit
+): Bitmap {
     val transformer = BitmapTransformer()
     transformer.config()
-    val attrs = Attrs(this, matrix = matrix)
-    return transformer.transform(attrs) {
+    val initial = BitmapTransformerAttrs(bitmap = this, matrix = matrix)
+
+    val newAttrs = transformer.transform(initial) { attrs ->
         val paint = Paint()
-        colorFilter?.let {
-            paint.colorFilter = PorterDuffColorFilter(it, PorterDuff.Mode.SRC_ATOP)
+        paint.colorFilter = attrs.colorFilter
+        val bitmap = attrs.bitmap.transform(attrs.size, matrix, paint) { canvas ->
+            attrs.background?.let(canvas::drawColor)
         }
-        this.copy(
-            bitmap = bitmap.transform(size, matrix, paint) { canvas ->
-                background?.let(canvas::drawColor)
-            }
-        )
-    }.bitmap
+        attrs.copy(bitmap = bitmap)
+    }
+    return newAttrs.bitmap
 }

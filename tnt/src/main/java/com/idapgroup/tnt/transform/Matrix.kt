@@ -2,6 +2,9 @@ package com.idapgroup.tnt.transform
 
 import android.graphics.Matrix
 
+/**
+ * Calc matrix that will transform content with [src] to [dst] size based on this [ScaleType] mode
+ */
 fun ScaleType.toMatrix(src: Size, dst: Size): Matrix {
     val matrix = Matrix()
 
@@ -42,10 +45,15 @@ private fun Matrix.setCrop(src: Size, dst: Size, ratio: Float) {
     postTranslate(dx, dy)
 }
 
-fun ScaleType.toScaleToFit(): Matrix.ScaleToFit = when (this) {
+private fun ScaleType.toScaleToFit(): Matrix.ScaleToFit = when (this) {
     ScaleType.FitStart -> Matrix.ScaleToFit.START
     ScaleType.FitCenter -> Matrix.ScaleToFit.CENTER
     ScaleType.FitEnd -> Matrix.ScaleToFit.END
     ScaleType.FitXY -> Matrix.ScaleToFit.FILL
     else -> throw IllegalArgumentException("Unsupported scale type: $this")
+}
+
+internal fun Matrix.rotate(degrees: Float, size: Size): Matrix {
+    postRotate(degrees, size.width / 2f, size.height / 2f)
+    return this
 }
