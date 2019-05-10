@@ -23,12 +23,12 @@ fun BitmapTransformer.blur(
  * Add colorFilter to [BitmapTransformer] by color components(alpha, red, green, blue)
  */
 fun BitmapTransformer.colorFilter(
-    @IntRange(from = 0, to = 255) alpha: Int,
-    @IntRange(from = 0, to = 255) red: Int,
-    @IntRange(from = 0, to = 255) green: Int,
-    @IntRange(from = 0, to = 255) blue: Int
+    @IntRange(from = 0, to = 255) a: Int,
+    @IntRange(from = 0, to = 255) r: Int,
+    @IntRange(from = 0, to = 255) g: Int,
+    @IntRange(from = 0, to = 255) b: Int
 ) =
-    colorFilter(Color.argb(alpha, red, green, blue))
+    colorFilter(Color.argb(a, r, g, b))
 
 /**
  * Add colorFilter to [BitmapTransformer]

@@ -46,7 +46,7 @@ class SampleFragment : Fragment() {
         val bitmap = file.transformAsBitmap {
             square(600, cropCenter)
                 colorFilter(100, 33, 100, 98)
-                blur(sampling = 9f, radius = 6, context = context)
+                blur()
         }
         imageView.setImageBitmap(bitmap)
     }

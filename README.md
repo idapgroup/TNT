@@ -62,34 +62,21 @@ TRANSFORM usage sample
 -------------
 
 Tramsormation functions:
-* __resize(width, height)__ - change origin size of bitmap.Scale type `cropCenter` selected by default 
-* __square(size: Int?)__ - if size null - takes origin bitmap smaller side
+* __resize(width, height, scaleType)__ - change origin size of bitmap.
+  Supported scale types: `cropStart`, `cropCenter`, `cropEnd`, `fitStart`, `fitCenter`, `fitEnd`, `fitXY`
+* __square(size: Int?, scaleType)__ - if size null - takes origin bitmap smaller side
 * __rotate(degrees: Float)__ - rotates bitmap by selected degrees
 * __background(color: Int)__ - set bitmap background for `fitStart`, `fitCenter`, `fitEnd` modes
-* __cropStart()__ - crops bitmap from start position
-* __cropEnd()__ - crops bitmap from end position
-* __cropCenter()__ - scale the image uniformly (maintain the image's aspect ratio) so
-that both dimensions (width and height) of the image will be equal
-to or larger than the corresponding dimension of the view
-(minus padding). The image is then centered in the view.
-* __fitXY()__ - scale in X and Y independently, so that src matches dst exactly. This may change the
-aspect ratio of the src.
-* __fitStart()__ - compute a scale that will maintain the original src aspect ratio, but will also ensure
-that src fits entirely inside dst. At least one axis (X or Y) will fit exactly. START
-aligns the result to the left and top edges of dst.
-* __fitCenter()__ - compute a scale that will maintain the original src aspect ratio, but will also ensure
-that src fits entirely inside dst. At least one axis (X or Y) will fit exactly. The
-result is centered inside dst.
-* __fitEnd()__ - compute a scale that will maintain the original src aspect ratio, but will also ensure
-that src fits entirely inside dst. At least one axis (X or Y) will fit exactly. END
-aligns the result to the right and bottom edges of dst.
+* __blur(radius, sampling)__
+* __colorFilter(color)__
 
 ```kotlin
-val bitmap = someBitmap.transform {
-    resize(100, 200)
-    cropEnd()
+val bitmap = file.transformAsBitmap {
+    resize(100, 200, cropEnd)
     rotate(43f)
+	colorFilter(a = 89, r = 34, g = 120, b = 34)
     background(Color.RED)
+	blur()
 }
 ```
 
