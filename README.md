@@ -63,8 +63,9 @@ TRANSFORM usage sample
 
 Tramsormation functions:
 * __resize(width, height, scaleType)__ - change origin size of bitmap.
-*  Supported scale types: `cropStart`, `cropCenter`, `cropEnd`, `fitStart`, `fitCenter`, `fitEnd`, `fitXY`
 * __square(size: Int?, scaleType)__ - if size null - takes origin bitmap smaller side
+*  Supported scale types: `cropStart`, `cropCenter`, `cropEnd`, `fitStart`, `fitCenter`, `fitEnd`, `fitXY`
+
 * __rotate(degrees: Float)__ - rotates bitmap by selected degrees
 * __background(color: Int)__ - set bitmap background for `fitStart`, `fitCenter`, `fitEnd` modes
 * __blur(radius, sampling)__
