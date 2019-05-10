@@ -75,9 +75,9 @@ Tramsormation functions:
 val bitmap = file.transformAsBitmap {
     resize(100, 200, cropEnd)
     rotate(43f)
-	colorFilter(a = 89, r = 34, g = 120, b = 34)
+    colorFilter(a = 89, r = 34, g = 120, b = 34)
     background(Color.RED)
-	blur()
+    blur()
 }
 ```
 
