@@ -6,7 +6,7 @@
     <application>
         <provider
                 android:name="androidx.core.content.FileProvider"
-                android:authorities="com.idapgroup.provider"
+                android:authorities="${applicationId}.tnt.provider"
                 android:exported="false"
                 android:grantUriPermissions="true">
             <meta-data

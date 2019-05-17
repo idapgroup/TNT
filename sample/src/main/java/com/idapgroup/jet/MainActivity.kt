@@ -6,10 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
-import com.idapgroup.tnt.takePhotoFromCamera
+import com.idapgroup.tnt.pickImageFromGallery
 import com.idapgroup.tnt.transform.*
 import kotlinx.android.synthetic.main.screen_sample.*
 import java.io.File
@@ -33,8 +32,8 @@ class SampleFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         imageView.setOnClickListener {
-            //            pickImageFromGallery(::onTaken)
-            takePhotoFromCamera(::take)
+                        pickImageFromGallery(::onTaken)
+//            takePhotoFromCamera(::take)
         }
     }
 

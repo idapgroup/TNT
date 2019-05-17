@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.core.os.bundleOf
@@ -12,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import com.idapgroup.argumentdelegate.argumentDelegate
 import java.io.File
+import kotlin.reflect.KClass
 
 private const val GALLERY_REQUEST = 101
 private const val CAMERA_REQUEST = 102
@@ -32,13 +34,18 @@ internal class ResultFragment : Fragment() {
             )
         }
     }
+    
+    private class Result<out T: Any>(
+        val value: T,
+        val clazz: KClass<out T>
+    )
 
     private val destination: Destination by argumentDelegate()
     private val action: ImageSource by argumentDelegate()
     private val funName: String by argumentDelegate()
 
     private var started = false
-    private var pendingResult: Any? = null
+    private var pendingResult: Result<Any>? = null
     private var photoFile: File? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,9 +72,7 @@ internal class ResultFragment : Fragment() {
                 )
             }
         } else {
-            pendingResult?.let {
-                onDestinationResult(it)
-            }
+            pendingResult?.let(::handleResultAndFinish)
         }
     }
 
@@ -96,25 +101,30 @@ internal class ResultFragment : Fragment() {
         if(resultCode != Activity.RESULT_OK) return
 
         val result = when(requestCode) {
-            GALLERY_REQUEST -> data!!.data!!
-            CAMERA_REQUEST -> photoFile!!
+            GALLERY_REQUEST -> Result(data!!.data!!, Uri::class)
+            CAMERA_REQUEST -> Result(photoFile!!, File::class)
             else -> throw  RuntimeException("Are you crazy?")
         }
+        tryHandleResultAndFinish(result)
+    }
+
+    private fun tryHandleResultAndFinish(result: Result<Any>) {
         if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-            onDestinationResult(result)
+            handleResultAndFinish(result)
         } else {
             pendingResult = result
         }
     }
 
-    private fun onDestinationResult(result: Any) {
-        val obj: Any = when(destination) {
+    private fun handleResultAndFinish(result: Result<Any>) {
+        val target: Any = when(destination) {
             Destination.ACTIVITY -> activity!!
             Destination.FRAGMENT -> parentFragment!!
         }
-        val method = obj::class.java.getDeclaredMethod(funName, result::class.java)
+        val method = target::class.java.getDeclaredMethod(funName, result.clazz.java)
         method.isAccessible = true
-        method.invoke(obj, result)
+        method.invoke(target, result.value)
+        
         fragmentManager?.popBackStack()
     }
 }
