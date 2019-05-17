@@ -19,33 +19,32 @@ private const val GALLERY_REQUEST = 101
 private const val CAMERA_REQUEST = 102
 private const val CAMERA_PERMISSION_REQUEST = 201
 
+@PublishedApi
 internal class ResultFragment : Fragment() {
 
     companion object {
         fun newInstance(
-            destination: Destination,
+            target: Target,
             action: ImageSource,
-            funName: String
+            funName: String,
+            resultClass: KClass<*>
         ) = ResultFragment().apply {
             arguments = bundleOf(
-                "destination" to destination,
+                "target" to target,
                 "action" to action,
-                "funName" to funName
+                "funName" to funName,
+                "resultClass" to resultClass.java
             )
         }
     }
-    
-    private class Result<out T: Any>(
-        val value: T,
-        val clazz: KClass<out T>
-    )
 
-    private val destination: Destination by argumentDelegate()
+    private val target: Target by argumentDelegate()
     private val action: ImageSource by argumentDelegate()
     private val funName: String by argumentDelegate()
+    private val resultClass: Class<*> by argumentDelegate()
 
     private var started = false
-    private var pendingResult: Result<Any>? = null
+    private var pendingResult: Any? = null
     private var photoFile: File? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -101,14 +100,14 @@ internal class ResultFragment : Fragment() {
         if(resultCode != Activity.RESULT_OK) return
 
         val result = when(requestCode) {
-            GALLERY_REQUEST -> Result(data!!.data!!, Uri::class)
-            CAMERA_REQUEST -> Result(photoFile!!, File::class)
+            GALLERY_REQUEST -> data!!.data!!
+            CAMERA_REQUEST -> photoFile!!
             else -> throw  RuntimeException("Are you crazy?")
         }
         tryHandleResultAndFinish(result)
     }
 
-    private fun tryHandleResultAndFinish(result: Result<Any>) {
+    private fun tryHandleResultAndFinish(result: Any) {
         if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
             handleResultAndFinish(result)
         } else {
@@ -116,16 +115,30 @@ internal class ResultFragment : Fragment() {
         }
     }
 
-    private fun handleResultAndFinish(result: Result<Any>) {
-        val target: Any = when(destination) {
-            Destination.ACTIVITY -> activity!!
-            Destination.FRAGMENT -> parentFragment!!
+    private fun handleResultAndFinish(result: Any) {
+        val target: Any = when(target) {
+            Target.ACTIVITY -> activity!!
+            Target.FRAGMENT -> parentFragment!!
         }
-        val method = target::class.java.getDeclaredMethod(funName, result.clazz.java)
+        val method = target::class.java.getDeclaredMethod(funName, resultClass)
         method.isAccessible = true
-        method.invoke(target, result.value)
-        
-        fragmentManager?.popBackStack()
+        method.invoke(target, mapResult(result))
+
+        finish()
+    }
+
+    private fun mapResult(result: Any): Any {
+        return if (result is File && resultClass === Uri::class.java) {
+            Uri.fromFile(result)
+        } else {
+            result
+        }
+    }
+
+    private fun finish() {
+        fragmentManager!!.beginTransaction()
+            .remove(this)
+            .commit()
     }
 }
 
