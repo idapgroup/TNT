@@ -18,6 +18,7 @@ import kotlin.reflect.KClass
 private const val GALLERY_REQUEST = 101
 private const val CAMERA_REQUEST = 102
 private const val CAMERA_PERMISSION_REQUEST = 201
+private const val READ_STORAGE_PERMISSION_REQUEST = 202
 
 @PublishedApi
 internal class ResultFragment : Fragment() {
@@ -61,22 +62,30 @@ internal class ResultFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        if(started.not()) {
+        if (started.not()) {
             started = true
-            when(action) {
+            when (action) {
                 ImageSource.CAMERA -> takePhoto()
-                ImageSource.GALLERY -> pickImage(
-                    GALLERY_REQUEST,
-                    ::startActivityForResult
-                )
+                ImageSource.GALLERY -> takeImage()
             }
         } else {
             pendingResult?.let(::handleResultAndFinish)
         }
     }
 
+    private fun takeImage() {
+        if (context!!.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+            pickImage(
+                GALLERY_REQUEST,
+                ::startActivityForResult
+            )
+        } else {
+            requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), READ_STORAGE_PERMISSION_REQUEST)
+        }
+    }
+
     private fun takePhoto() {
-        if(context!!.isPermissionGranted(Manifest.permission.CAMERA)) {
+        if (context!!.isPermissionGranted(Manifest.permission.CAMERA)) {
             photoFile = takePhoto(
                 context!!,
                 CAMERA_REQUEST,
@@ -88,18 +97,22 @@ internal class ResultFragment : Fragment() {
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        if(requestCode == CAMERA_PERMISSION_REQUEST && grantResults.isRequestGranted()) {
-            takePhoto()
+        if(grantResults.isRequestGranted()) {
+            when(requestCode) {
+                CAMERA_PERMISSION_REQUEST -> takePhoto()
+                READ_STORAGE_PERMISSION_REQUEST -> takeImage()
+            }
         } else {
+            //todo
             fragmentManager?.popBackStack()
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if(resultCode != Activity.RESULT_OK) return
+        if (resultCode != Activity.RESULT_OK) return
 
-        val result = when(requestCode) {
+        val result = when (requestCode) {
             GALLERY_REQUEST -> data!!.data!!
             CAMERA_REQUEST -> photoFile!!
             else -> throw  RuntimeException("Are you crazy?")
@@ -116,7 +129,7 @@ internal class ResultFragment : Fragment() {
     }
 
     private fun handleResultAndFinish(result: Any) {
-        val target: Any = when(target) {
+        val target: Any = when (target) {
             Target.ACTIVITY -> activity!!
             Target.FRAGMENT -> parentFragment!!
         }
