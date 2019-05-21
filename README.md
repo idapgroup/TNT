@@ -5,7 +5,7 @@ Library created for simple taking images/photos from gallery or camera source an
 Download
 --------
 
-[ ![Download](https://api.bintray.com/packages/idapgroup/kotlin/TNT/images/download.svg?version=1.0.3) ](https://bintray.com/idapgroup/kotlin/TNT/1.0.3/link)
+[ ![Download](https://api.bintray.com/packages/idapgroup/kotlin/TNT/images/download.svg?version=1.1.0) ](https://bintray.com/idapgroup/kotlin/TNT/1.1.0/link)
 
 Add repository to your root `build.gradle`
 
@@ -25,11 +25,17 @@ TAKE usage sample
 -------------
 
 Activity and Fragment have next extension functions:
-__pickImageFromGallery(onTaken: KFunction1<Uri, Unit>)__ - opens native android image picker and returns selected image Uri.
+__pickImageFromGallery(onTaken: KFunction1<Uri, Unit>, configPermissions: ((PermissionConfig.() -> Unit))? = {})__ - opens native android image picker and returns selected image Uri.
 * `onTaken` - member function of this Activity/Fragment that takes Uri as an argument.
+* `configPermissions` - builder for permission denied callbacks, if null - no permission request called.
 
-__takePhotoFromCamera(onTaken: KFunction1<File, Unit>)__ - opens native android camera and returns taken photo File.
+__takePhotoFromCamera(onTaken: KFunction1<Uri, Unit>, configPermissions: (PermissionConfig.() -> Unit) = {})__ - opens native android camera and returns taken photo Uri.
+* `onTaken` - member function of tthis Activity/Fragment that takes Uri as an argument.
+* `configPermissions` - builder for permission denied callbacks.
+
+__takePhotoFromCamera(onTaken: KFunction1<File, Unit>, configPermissions: (PermissionConfig.() -> Unit) = {})__ - opens native android camera and returns taken photo File.
 * `onTaken` - member function of tthis Activity/Fragment that takes File as an argument.
+* `configPermissions` - builder for permission denied callbacks.
 
 ```kotlin
 class ExampleActivity : Activity {
@@ -37,10 +43,22 @@ class ExampleActivity : Activity {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         galleryButton.setOnClickListener {
-            pickImageFromGallery(::imagePicked)
+            pickImageFromGallery(::imagePicked, null)
         }
-        galleryButton.setOnClickListener {
-            takePhotoFromCamera(::photoTaken)
+        cameraButton.setOnClickListener {
+            takePhotoFromCamera(
+            onTaken = ::photoTaken,
+            configPermissions = {
+                    onDenied {
+                        Toast.makeText(context!!, "Camera permission denied", Toast.LENGTH_SHORT).show()
+                    }
+                    onPermanentlyDenied {
+                        Toast.makeText(context!!, "Camera permission permanently denied", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            )
+            // or
+            // takePhotoFromCamera(::imagePicked)
         }
     }
     
