@@ -28,7 +28,8 @@ internal class ResultFragment : Fragment() {
             target: Target,
             action: ImageSource,
             funName: String,
-            resultClass: KClass<*>
+            resultClass: KClass<*>,
+            permissionConfig: PermissionConfig?
         ) = ResultFragment().apply {
             arguments = bundleOf(
                 "target" to target,
@@ -36,6 +37,7 @@ internal class ResultFragment : Fragment() {
                 "funName" to funName,
                 "resultClass" to resultClass.java
             )
+            this.permissionConfig = permissionConfig
         }
     }
 
@@ -43,6 +45,8 @@ internal class ResultFragment : Fragment() {
     private val action: ImageSource by argumentDelegate()
     private val funName: String by argumentDelegate()
     private val resultClass: Class<*> by argumentDelegate()
+
+    private var permissionConfig: PermissionConfig? = null
 
     private var started = false
     private var pendingResult: Any? = null
@@ -74,7 +78,7 @@ internal class ResultFragment : Fragment() {
     }
 
     private fun takeImage() {
-        if (context!!.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+        if (permissionConfig == null || context!!.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE)) {
             pickImage(
                 GALLERY_REQUEST,
                 ::startActivityForResult
@@ -103,8 +107,12 @@ internal class ResultFragment : Fragment() {
                 READ_STORAGE_PERMISSION_REQUEST -> takeImage()
             }
         } else {
-            //todo
-            fragmentManager?.popBackStack()
+            if(shouldShowRequestPermissionRationale(permissions[0])) {
+                permissionConfig?.onDenied?.invoke()
+            } else {
+                permissionConfig?.onPermanentlyDenied?.invoke()
+            }
+            finish()
         }
     }
 
