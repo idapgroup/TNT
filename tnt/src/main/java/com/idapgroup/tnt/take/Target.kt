@@ -1,6 +1,6 @@
 package com.idapgroup.tnt.take
 
-enum class Destination {
+enum class Target {
     FRAGMENT,
     ACTIVITY
 }

@@ -2,6 +2,7 @@ package com.idapgroup.tnt.take
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
@@ -37,7 +38,12 @@ internal fun pickImage(
     startActivity(intent.withChooser(), requestCode)
 }
 
-private fun File.providerUri(context: Context) =
-    FileProvider.getUriForFile(context, "com.idapgroup.provider", this)
+private fun File.providerUri(context: Context): Uri {
+    val packageInfo = context.packageManager
+        .getPackageInfo(context.packageName, PackageManager.GET_PROVIDERS)
+    val provider = packageInfo.providers
+        .first { it.authority.endsWith(".tnt.provider") }
+    return FileProvider.getUriForFile(context, provider.authority, this)
+}
 
 private fun Intent.withChooser() = Intent.createChooser(this, "")

@@ -1,18 +1,23 @@
 package com.idapgroup.jet
 
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
+import com.idapgroup.tnt.pickImageFromGallery
 import com.idapgroup.tnt.takePhotoFromCamera
-import com.idapgroup.tnt.transform.*
 import kotlinx.android.synthetic.main.screen_sample.*
-import java.io.File
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,21 +38,41 @@ class SampleFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         imageView.setOnClickListener {
-            //            pickImageFromGallery(::onTaken)
-            takePhotoFromCamera(::take)
+            pickImageFromGallery(::onTaken)
+            takePhotoFromCamera(onTaken = ::onTaken, configPermissions = {
+                onDenied {
+                    Toast.makeText(context!!, "denied", Toast.LENGTH_SHORT).show()
+                }
+                onPermanentlyDenied {
+                    Toast.makeText(context!!, "permanently denied", Toast.LENGTH_SHORT).show()
+                }
+            })
         }
     }
 
     fun onTaken(uri: Uri) {
-        Glide.with(imageView).load(uri).into(imageView)
-    }
+        Exception().printStackTrace()
+        Glide.with(imageView).load(uri).addListener(object : RequestListener<Drawable> {
+            override fun onLoadFailed(
+                e: GlideException?,
+                model: Any?,
+                target: Target<Drawable>?,
+                isFirstResource: Boolean
+            ): Boolean {
+                e?.printStackTrace()
+                return false
+            }
 
-    private fun take(file: File) {
-        val bitmap = file.transformAsBitmap {
-            square(600, cropCenter)
-                colorFilter(100, 33, 100, 98)
-                blur()
-        }
-        imageView.setImageBitmap(bitmap)
+            override fun onResourceReady(
+                resource: Drawable?,
+                model: Any?,
+                target: Target<Drawable>?,
+                dataSource: DataSource?,
+                isFirstResource: Boolean
+            ): Boolean {
+                return false
+            }
+
+        }).into(imageView)
     }
 }

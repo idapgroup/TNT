@@ -3,7 +3,7 @@ package com.idapgroup.tnt.take
 import kotlin.reflect.KFunction1
 
 @PublishedApi
-internal inline fun <reified T> Any.assertMember(function: KFunction1<T, Unit>) {
+internal inline fun <reified T> Any.assertHasMethod(function: KFunction1<T, Unit>) {
     try {
         this::class.java.getDeclaredMethod(function.name, T::class.java)
     } catch (e: NoSuchMethodException) {
