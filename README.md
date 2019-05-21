@@ -25,6 +25,7 @@ TAKE usage sample
 -------------
 
 Activity and Fragment have next extension functions:
+
 __pickImageFromGallery(onTaken: KFunction1<Uri, Unit>, configPermissions: ((PermissionConfig.() -> Unit))? = {})__ - opens native android image picker and returns selected image Uri.
 * `onTaken` - member function of this Activity/Fragment that takes Uri as an argument.
 * `configPermissions` - builder for permission denied callbacks, if null - no permission request called.
