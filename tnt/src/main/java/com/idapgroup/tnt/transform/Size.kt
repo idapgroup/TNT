@@ -12,6 +12,7 @@ fun Size.toRect() = Rect(0, 0, width, height)
 fun Size.toRectF() = RectF(0f, 0f, width.toFloat(), height.toFloat())
 
 fun Size.toSizeF(): SizeF = SizeF(width.toFloat(), height.toFloat())
+fun SizeF.toSize(): Size = Size(width.toInt(), height.toInt())
 
 val Size.minSide get() = Math.min(width, height)
 val Size.maxSide get() = Math.max(width, height)
@@ -19,8 +20,13 @@ val Size.maxSide get() = Math.max(width, height)
 val Bitmap.size: Size get() = Size(width, height)
 val Bitmap.sizeF: SizeF get() = SizeF(width.toFloat(), height.toFloat())
 
-operator fun Size.div(number: Int) = Size(width / number, height / number)
+operator fun Size.div(number: Int) = SizeF(width / number.toFloat(), height / number.toFloat())
 operator fun Size.div(number: Float) = SizeF(width / number, height / number)
+
+fun Size.swapSides() = Size(height, width)
+
+operator fun Size.times(number: Int) = Size(width * number, height / number)
+operator fun Size.times(number: Float) = SizeF(width * number, height / number)
 
 operator fun SizeF.div(number: Float) = SizeF(width / number, height / number)
 

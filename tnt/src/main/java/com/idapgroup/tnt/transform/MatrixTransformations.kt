@@ -45,9 +45,17 @@ fun <A: Attrs<A>> MatrixTransformer<A>.resize(
     scaleType: ScaleType = cropCenter
 ) = resize({ Size(width, height) }, scaleType)
 
-private fun <A: Attrs<A>> MatrixTransformer<A>.resize(
+fun <A: Attrs<A>> MatrixTransformer<A>.resize(
+    max: Int
+) = resize(mapSize = {
+    val scale = it.maxSide / max.toFloat()
+    val newSize = (it / scale).toSize()
+    newSize
+})
+
+fun <A: Attrs<A>> MatrixTransformer<A>.resize(
     mapSize: (Size) -> Size,
-    scaleType: ScaleType
+    scaleType: ScaleType = cropCenter
 ) = preTransform {
     val newSize = mapSize(it.size)
     it.matrix.postConcat(scaleType.toMatrix(it.size, newSize))

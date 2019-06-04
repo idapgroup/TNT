@@ -77,8 +77,15 @@ fun DataSource.transformAsBitmap(
     config: BitmapTransformer.() -> Unit
 ): Bitmap {
     val bitmap = toBitmap()
-    val matrix = Matrix().rotate(getExifRotationDegrees(), bitmap.size)
-    return bitmap.transform(matrix, config)
+    val rotation = getExifRotationDegrees()
+    val matrix = Matrix().rotate(rotation, bitmap.size)
+
+    return bitmap.transform(matrix) {
+        resize(mapSize = {
+            if (rotation == 90f || rotation == 270f) it.swapSides() else it
+        })
+        config()
+    }
 }
 
 private fun DataSource.getExifRotationDegrees(): Float =

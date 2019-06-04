@@ -9,8 +9,8 @@
 
     <FrameLayout
             android:id="@+id/fragmentContainer"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
             android:background="#000"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"

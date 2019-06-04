@@ -1,7 +1,7 @@
 package com.idapgroup.tnt.transform
 
 import android.graphics.Matrix
-import com.idapgroup.tnt.transform.MatrixTransformer.*
+import com.idapgroup.tnt.transform.MatrixTransformer.Attrs
 
 /**
  * Apply configured [MatrixTransformer] to this [Matrix]
@@ -35,11 +35,11 @@ open class MatrixTransformer<A: Attrs<A>> {
     private val preTransforms = mutableListOf<(A) -> A>()
     private val postTransforms = mutableListOf<(A) -> A>()
 
-    internal fun preTransform(transform: (A) -> A) {
+    fun preTransform(transform: (A) -> A) {
         preTransforms += transform
     }
 
-    internal fun postTransform(transform: (A) -> A) {
+    fun postTransform(transform: (A) -> A) {
         postTransforms += transform
     }
 
