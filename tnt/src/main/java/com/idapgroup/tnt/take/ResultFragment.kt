@@ -5,7 +5,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
 import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.core.os.bundleOf
@@ -13,7 +12,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import com.idapgroup.argumentdelegate.argumentDelegate
 import java.io.File
-import kotlin.reflect.KClass
 
 private const val GALLERY_REQUEST = 101
 private const val CAMERA_REQUEST = 102
@@ -27,15 +25,13 @@ internal class ResultFragment : Fragment() {
         fun newInstance(
             target: Target,
             action: ImageSource,
-            funName: String,
-            resultClass: KClass<*>,
+            callback: Callback,
             permissionConfig: PermissionConfig?
         ) = ResultFragment().apply {
             arguments = bundleOf(
                 "target" to target,
                 "action" to action,
-                "funName" to funName,
-                "resultClass" to resultClass.java
+                "callback" to callback
             )
             this.permissionConfig = permissionConfig
         }
@@ -43,8 +39,7 @@ internal class ResultFragment : Fragment() {
 
     private val target: Target by argumentDelegate()
     private val action: ImageSource by argumentDelegate()
-    private val funName: String by argumentDelegate()
-    private val resultClass: Class<*> by argumentDelegate()
+    private val callback: Callback by argumentDelegate()
 
     private var permissionConfig: PermissionConfig? = null
 
@@ -141,19 +136,8 @@ internal class ResultFragment : Fragment() {
             Target.ACTIVITY -> activity!!
             Target.FRAGMENT -> parentFragment!!
         }
-        val method = target::class.java.getDeclaredMethod(funName, resultClass)
-        method.isAccessible = true
-        method.invoke(target, mapResult(result))
-
+        callback.call(target, result)
         finish()
-    }
-
-    private fun mapResult(result: Any): Any {
-        return if (result is File && resultClass === Uri::class.java) {
-            Uri.fromFile(result)
-        } else {
-            result
-        }
     }
 
     private fun finish() {

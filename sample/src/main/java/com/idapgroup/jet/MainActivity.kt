@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.idapgroup.tnt.pickImageFromGallery
@@ -12,7 +13,7 @@ import com.idapgroup.tnt.transform.asDataSource
 import com.idapgroup.tnt.transform.resize
 import com.idapgroup.tnt.transform.transformAsBitmap
 import kotlinx.android.synthetic.main.screen_sample.*
-
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,7 +34,7 @@ class SampleFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         imageView.setOnClickListener {
-            pickImageFromGallery(::onTaken)
+            pickImageFromGallery(::onTaken, Date())
 //            takePhotoFromCamera(onTaken = ::onTaken, configPermissions = {
 //                onDenied {
 //                    Toast.makeText(context!!, "denied", Toast.LENGTH_SHORT).show()
@@ -45,10 +46,13 @@ class SampleFragment : Fragment() {
         }
     }
 
-    fun onTaken(uri: Uri) {
-        val bitmap = uri.asDataSource(context!!).transformAsBitmap {
-            resize(max = 640)
-        }
+    fun onTaken(uri: Uri, date: Date) {
+        Toast.makeText(context, "Date: $date", Toast.LENGTH_LONG).show()
+
+        val bitmap = uri.asDataSource(context!!)
+            .transformAsBitmap {
+                resize(max = 640)
+            }
         imageView.setImageBitmap(bitmap)
     }
 }
