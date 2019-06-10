@@ -30,6 +30,7 @@ fun FragmentActivity.pickImageFromGallery(
 /**
  * Calls android's native image picker
  * @param onPicked - member function of calling [FragmentActivity] that returns picked image Uri
+ * @param param - will be preserved and return as second param in [onPicked] callback. Must be [Serializable] or [Parcelable]
  * @param configPermissions - Builder for permission denied callbacks, if null - no permission request called.
  */
 inline fun <reified T> FragmentActivity.pickImageFromGallery(
@@ -65,7 +66,7 @@ fun Fragment.pickImageFromGallery(
 /**
  * Calls native android image picker
  * @param onPicked - member function of calling Fragment that returns picked image Uri
- * @param param - will be preserved and return as second param in callback. Must be [Serializable] or [Parcelable]
+ * @param param - will be preserved and return as second param in [onPicked] callback. Must be [Serializable] or [Parcelable]
  * @param configPermissions - Builder for permission denied callbacks, if null - no permission request called.
  */
 inline fun <reified T> Fragment.pickImageFromGallery(
