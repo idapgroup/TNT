@@ -7,15 +7,15 @@ internal fun Any.addResultFragment(
     fragmentManager: FragmentManager,
     target: Target,
     source: ImageSource,
-    callback: Callback,
-    configPermissions: (PermissionConfig.() -> Unit)?
+    block: RequestParams.() -> Unit
 ) {
+    val params = RequestParams().apply(block)
+
+    val callback = params.callback ?: throw RuntimeException("Callback in the request params must be assigned")
     callback.assertIsOwner(this)
 
-    val permissionCallbacks = configPermissions?.let { PermissionConfig().apply(it) }
-
     val fragment = ResultFragment.newInstance(
-        target, source, callback, permissionCallbacks)
+        target, source, callback, params.permissionParams)
 
     fragmentManager.beginTransaction()
         .add(fragment, null)

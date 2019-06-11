@@ -26,14 +26,14 @@ internal class ResultFragment : Fragment() {
             target: Target,
             action: ImageSource,
             callback: Callback,
-            permissionConfig: PermissionConfig?
+            permissionParams: PermissionParams?
         ) = ResultFragment().apply {
             arguments = bundleOf(
                 "target" to target,
                 "action" to action,
                 "callback" to callback
             )
-            this.permissionConfig = permissionConfig
+            this.permissionParams = permissionParams
         }
     }
 
@@ -41,7 +41,7 @@ internal class ResultFragment : Fragment() {
     private val action: ImageSource by argumentDelegate()
     private val callback: Callback by argumentDelegate()
 
-    private var permissionConfig: PermissionConfig? = null
+    private var permissionParams: PermissionParams? = null
 
     private var started = false
     private var pendingResult: Any? = null
@@ -73,7 +73,7 @@ internal class ResultFragment : Fragment() {
     }
 
     private fun takeImage() {
-        if (permissionConfig == null || context!!.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+        if (permissionParams == null || context!!.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE)) {
             pickImage(
                 GALLERY_REQUEST,
                 ::startActivityForResult
@@ -103,9 +103,9 @@ internal class ResultFragment : Fragment() {
             }
         } else {
             if(shouldShowRequestPermissionRationale(permissions[0])) {
-                permissionConfig?.onDenied?.invoke()
+                permissionParams?.onDenied?.invoke()
             } else {
-                permissionConfig?.onPermanentlyDenied?.invoke()
+                permissionParams?.onPermanentlyDenied?.invoke()
             }
             finish()
         }
