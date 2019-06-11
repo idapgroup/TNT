@@ -1,15 +1,17 @@
 package com.idapgroup.tnt.take
 
-import java.io.Serializable
+import android.os.Bundle
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction1
 import kotlin.reflect.KFunction2
 
-interface Callback: Serializable {
+interface Callback {
 
     fun assertIsOwner(target: Any)
 
     fun call(target: Any, result: Any)
+
+    fun toBundle(): Bundle
 }
 
 @PublishedApi

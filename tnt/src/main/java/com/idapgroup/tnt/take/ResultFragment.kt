@@ -31,7 +31,7 @@ internal class ResultFragment : Fragment() {
             arguments = bundleOf(
                 "target" to target,
                 "action" to action,
-                "callback" to callback
+                "callbackBundle" to callback.toBundle()
             )
             this.permissionParams = permissionParams
         }
@@ -39,7 +39,9 @@ internal class ResultFragment : Fragment() {
 
     private val target: Target by argumentDelegate()
     private val action: ImageSource by argumentDelegate()
-    private val callback: Callback by argumentDelegate()
+    private val callbackBundle: Bundle by argumentDelegate()
+
+    private val callback: Callback by lazy { toCallback(callbackBundle) }
 
     private var permissionParams: PermissionParams? = null
 
