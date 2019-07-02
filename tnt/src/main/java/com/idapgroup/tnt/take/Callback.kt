@@ -15,12 +15,10 @@ interface Callback {
 }
 
 @PublishedApi
-@JvmName("asCallback1")
-internal inline fun <reified R> KFunction1<R, Unit>.asCallback() =
+internal inline fun <reified R> KFunction1<R, Unit>.asCallback(): Callback =
     CallbackImpl(name, javaClass<R>())
 
 @PublishedApi
-@JvmName("asCallback2")
 internal inline fun <reified R, reified T> KFunction2<R, T, Unit>.asCallback(param: T): Callback =
     CallbackWithParamImpl(name, javaClass<R>(), javaClass<T>(), param)
 

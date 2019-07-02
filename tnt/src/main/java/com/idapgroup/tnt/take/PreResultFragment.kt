@@ -6,7 +6,7 @@ import androidx.fragment.app.FragmentManager
 internal fun Any.addResultFragment(
     fragmentManager: FragmentManager,
     target: Target,
-    source: ImageSource,
+    source: Source<*>,
     block: RequestParams.() -> Unit
 ) {
     val params = RequestParams().apply(block)

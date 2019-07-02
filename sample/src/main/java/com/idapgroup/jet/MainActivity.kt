@@ -8,8 +8,10 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.idapgroup.tnt.pickImageFromGallery
-import com.idapgroup.tnt.takePhotoFromCamera
+import com.idapgroup.tnt.pickFromGallery
+import com.idapgroup.tnt.take.CaptureType
+import com.idapgroup.tnt.take.MimeType
+import com.idapgroup.tnt.takeFromCamera
 import com.idapgroup.tnt.transform.asDataSource
 import com.idapgroup.tnt.transform.resize
 import com.idapgroup.tnt.transform.transformAsBitmap
@@ -39,13 +41,33 @@ class SampleFragment : Fragment() {
         pickImage.setOnClickListener {
             onPickImage()
         }
+        pickVideo.setOnClickListener {
+            onPickVideo()
+        }
         takePhoto.setOnClickListener {
             onTakePhoto()
+        }
+        takeVideo.setOnClickListener {
+            onTakeVideo()
+        }
+    }
+
+    private fun onPickVideo() {
+        pickFromGallery(MimeType.Video.Any) {
+            callback(func = ::onVideoTaken, param = Date())
+            permissions(
+                onDenied = {
+                    showToast( "Permission denied")
+                },
+                onPermanentlyDenied = {
+                    showToast( "Permission permanently denied")
+                }
+            )
         }
     }
 
     private fun onPickImage() {
-        pickImageFromGallery {
+        pickFromGallery(MimeType.Image.Any) {
             callback(func = ::onTaken, param = Date())
             permissions(
                 onDenied = {
@@ -59,8 +81,22 @@ class SampleFragment : Fragment() {
     }
 
     private fun onTakePhoto() {
-        takePhotoFromCamera {
+        takeFromCamera(CaptureType.Image) {
             callback(func = ::onTaken, param = Date())
+            permissions(
+                onDenied = {
+                    showToast( "Permission denied")
+                },
+                onPermanentlyDenied = {
+                    showToast( "Permission permanently denied")
+                }
+            )
+        }
+    }
+
+    private fun onTakeVideo() {
+        takeFromCamera(CaptureType.Video) {
+            callback(func = ::onVideoTaken, param = Date())
             permissions(
                 onDenied = {
                     showToast( "Permission denied")
@@ -80,6 +116,10 @@ class SampleFragment : Fragment() {
                 resize(max = 640)
             }
         imageView.setImageBitmap(bitmap)
+    }
+
+    private fun onVideoTaken(uri: Uri, date: Date) {
+        Toast.makeText(context, "$uri", Toast.LENGTH_LONG).show()
     }
 
     private fun showToast(msg: String) {

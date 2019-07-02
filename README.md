@@ -1,11 +1,11 @@
 Take And Transform
 ============
-Library created for simple taking images/photos from gallery or camera source and then apply transoformations such as: crop, fit, rotate etc. Based on reflection under the hood.
+Library created for simple taking images/photos/videos from gallery or camera source and then apply transoformations such as: crop, fit, rotate etc. Based on reflection under the hood.
 
 Download
 --------
 
-[ ![Download](https://api.bintray.com/packages/idapgroup/kotlin/TNT/images/download.svg?version=1.1.1) ](https://bintray.com/idapgroup/kotlin/TNT/1.1.1/link)
+[ ![Download](https://api.bintray.com/packages/idapgroup/kotlin/TNT/images/download.svg?version=2.0.1) ](https://bintray.com/idapgroup/kotlin/TNT/2.0.1/link)
 
 Add repository to your root `build.gradle`
 
@@ -25,17 +25,21 @@ TAKE usage sample
 -------------
 
 Activity and Fragment have next extension functions:
-__pickImageFromGallery(onTaken: KFunction1<Uri, Unit>, configPermissions: ((PermissionConfig.() -> Unit))? = {})__ - opens native android image picker and returns selected image Uri.
-* `onTaken` - member function of this Activity/Fragment that takes Uri as an argument.
-* `configPermissions` - builder for permission denied callbacks, if null - no permission request called.
+__pickFromGallery(mimeType: MimeType, block: RequestParams.() -> Unit)__ - opens native android picker and returns selected Uri.
+* `mimeType` - mime type of taking file;
+* `block` -  [RequestParams](#request-params)  block.
 
-__takePhotoFromCamera(onTaken: KFunction1<Uri, Unit>, configPermissions: (PermissionConfig.() -> Unit) = {})__ - opens native android camera and returns taken photo Uri.
-* `onTaken` - member function of tthis Activity/Fragment that takes Uri as an argument.
-* `configPermissions` - builder for permission denied callbacks.
+__takeFromCamera(type: CaptureType,  block: RequestParams.() -> Unit)__ - opens native android camera and returns taken photo/video Uri.
+* `type` - One of `Image` or `Video` capture type;
+* `block` -  [RequestParams](#request-params) block.
 
-__takePhotoFromCamera(onTaken: KFunction1<File, Unit>, configPermissions: (PermissionConfig.() -> Unit) = {})__ - opens native android camera and returns taken photo File.
-* `onTaken` - member function of tthis Activity/Fragment that takes File as an argument.
-* `configPermissions` - builder for permission denied callbacks.
+## RequestParams
+
+Builder function for additional picking/taking options.
+
+**callback(func: KFunction1<Uri, Unit>)** - takes result receiver, member method of target component.
+
+**permissions(onDenied: Action? = null, onPermanentlyDenied: Action? = null)** - permissions result handler.
 
 ```kotlin
 class ExampleActivity : Activity {
@@ -43,32 +47,35 @@ class ExampleActivity : Activity {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         galleryButton.setOnClickListener {
-            pickImageFromGallery(::imagePicked, null)
+			pickFromGallery(MimeType.Image.Any) {
+				callback(func = ::onTaken)
+				permissions(
+					onDenied = {
+						showToast( "Permission denied")
+					},
+					onPermanentlyDenied = {
+						showToast( "Permission permanently denied")
+					}
+            	)
+        	}
         }
         cameraButton.setOnClickListener {
-            takePhotoFromCamera(
-            onTaken = ::photoTaken,
-            configPermissions = {
-                    onDenied {
-                        Toast.makeText(context!!, "Camera permission denied", Toast.LENGTH_SHORT).show()
-                    }
-                    onPermanentlyDenied {
-                        Toast.makeText(context!!, "Camera permission permanently denied", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            )
-            // or
-            // takePhotoFromCamera(::imagePicked)
+			takeFromCamera(CaptureType.Video) {
+				callback(func = ::onTaken)
+				permissions(
+					onDenied = {
+						toast( "Permission denied")
+					},
+					onPermanentlyDenied = {
+						toast( "Permission permanently denied")
+					}
+				)
+			}
         }
     }
     
-    fun imagePicked(imageUri: Uri) {
-        // original uri of image
-    }
-    
-    fun photoTaken(file: File) {
-        // Original file in internal storage from Android camera. 
-        // do smth with file (send to server, remove etc.)
+    fun onTaken(uri: Uri) {
+        // original uri of file
     }
 
 }
@@ -88,7 +95,7 @@ Tramsormation functions:
 * __background(color: Int)__ - set bitmap background for `fitStart`, `fitCenter`, `fitEnd` modes
 * __blur(radius, sampling)__
 * __colorFilter(color)__
-
+(#some)
 ```kotlin
 val bitmap = file.transformAsBitmap {
     resize(100, 200, cropEnd)

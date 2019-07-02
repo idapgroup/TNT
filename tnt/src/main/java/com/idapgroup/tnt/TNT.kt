@@ -2,63 +2,65 @@ package com.idapgroup.tnt
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import com.idapgroup.tnt.take.ImageSource
-import com.idapgroup.tnt.take.RequestParams
+import com.idapgroup.tnt.take.*
 import com.idapgroup.tnt.take.Target
-import com.idapgroup.tnt.take.addResultFragment
 
 /**
- * Calls android's native image picker
+ * Calls android's native picker
  * @param block - sets request parameters
  */
-fun FragmentActivity.pickImageFromGallery(
+fun FragmentActivity.pickFromGallery(
+    mimeType: MimeType,
     block: RequestParams.() -> Unit
 ) =
     addResultFragment(
         fragmentManager = supportFragmentManager,
         target = Target.ACTIVITY,
-        source = ImageSource.GALLERY,
+        source = Source.Gallery(mimeType),
         block = block
     )
 
 /**
- * Calls native android image picker
+ * Calls native android picker
  * @param block - sets request parameters
  */
-fun Fragment.pickImageFromGallery(
+fun Fragment.pickFromGallery(
+    mimeType: MimeType,
     block: RequestParams.() -> Unit
 ) =
     addResultFragment(
         fragmentManager = childFragmentManager,
         target = Target.FRAGMENT,
-        source = ImageSource.GALLERY,
+        source = Source.Gallery(mimeType),
         block = block
     )
 
 /**
- * Calls native device camera app for taking photo.
+ * Calls native device camera app for taking photo/video.
  * @param block - collects request parameters
  */
-fun FragmentActivity.takePhotoFromCamera(
+fun FragmentActivity.takeFromCamera(
+    type: CaptureType,
     block: RequestParams.() -> Unit
 ) =
     addResultFragment(
         fragmentManager = supportFragmentManager,
         target = Target.ACTIVITY,
-        source = ImageSource.CAMERA,
+        source = Source.Camera(type),
         block = block
     )
 
 /**
- * Calls native device camera app for taking photo.
+ * Calls native device camera app for taking photo/video.
  * @param block - collects request parameters
  */
-fun Fragment.takePhotoFromCamera(
+fun Fragment.takeFromCamera(
+    type: CaptureType,
     block: RequestParams.() -> Unit
 ) =
     addResultFragment(
         fragmentManager = childFragmentManager,
         target = Target.FRAGMENT,
-        source = ImageSource.CAMERA,
+        source = Source.Camera(type),
         block = block
     )

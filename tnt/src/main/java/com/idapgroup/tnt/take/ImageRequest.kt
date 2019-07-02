@@ -9,14 +9,18 @@ import android.provider.MediaStore
 import androidx.core.content.FileProvider
 import java.io.File
 
-internal fun takePhoto(
+internal fun take(
     context: Context,
+    type: CaptureType,
     requestCode: Int,
     startActivity: (Intent, requestCode: Int) -> Unit,
     outFile: File? = null
 ): File {
-    val file = outFile ?: createTempImageFile(context)
-    val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+    val file = outFile ?: createTempFile(context, type)
+    val intent = when (type) {
+        CaptureType.Image -> Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        CaptureType.Video -> Intent(MediaStore.ACTION_VIDEO_CAPTURE)
+    }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         intent.putExtra(
             MediaStore.EXTRA_OUTPUT,
@@ -29,12 +33,13 @@ internal fun takePhoto(
     return file
 }
 
-internal fun pickImage(
+internal fun pick(
+    mimeType: MimeType,
     requestCode: Int,
     startActivity: (Intent, requestCode: Int) -> Unit
 ) {
     val intent = Intent(Intent.ACTION_PICK)
-    intent.type = "image/*"
+    intent.type = mimeType.value
     startActivity(intent.withChooser(), requestCode)
 }
 

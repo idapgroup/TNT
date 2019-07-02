@@ -24,7 +24,7 @@ internal class ResultFragment : Fragment() {
     companion object {
         fun newInstance(
             target: Target,
-            action: ImageSource,
+            action: Source<*>,
             callback: Callback,
             permissionParams: PermissionParams?
         ) = ResultFragment().apply {
@@ -38,7 +38,7 @@ internal class ResultFragment : Fragment() {
     }
 
     private val target: Target by argumentDelegate()
-    private val action: ImageSource by argumentDelegate()
+    private val action: Source<*> by argumentDelegate()
     private val callbackBundle: Bundle by argumentDelegate()
 
     private val callback: Callback by lazy { toCallback(callbackBundle) }
@@ -65,18 +65,19 @@ internal class ResultFragment : Fragment() {
         super.onStart()
         if (started.not()) {
             started = true
-            when (action) {
-                ImageSource.CAMERA -> takePhoto()
-                ImageSource.GALLERY -> takeImage()
+            when (val a = action) {
+                is Source.Camera -> take(a.type)
+                is Source.Gallery -> pick(a.type)
             }
         } else {
             pendingResult?.let(::handleResultAndFinish)
         }
     }
 
-    private fun takeImage() {
+    private fun pick(type: MimeType) {
         if (permissionParams == null || context!!.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-            pickImage(
+            pick(
+                type,
                 GALLERY_REQUEST,
                 ::startActivityForResult
             )
@@ -85,10 +86,11 @@ internal class ResultFragment : Fragment() {
         }
     }
 
-    private fun takePhoto() {
+    private fun take(type: CaptureType) {
         if (context!!.isPermissionGranted(Manifest.permission.CAMERA)) {
-            photoFile = takePhoto(
+            photoFile = take(
                 context!!,
+                type,
                 CAMERA_REQUEST,
                 ::startActivityForResult
             )
@@ -100,8 +102,8 @@ internal class ResultFragment : Fragment() {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         if(grantResults.isRequestGranted()) {
             when(requestCode) {
-                CAMERA_PERMISSION_REQUEST -> takePhoto()
-                READ_STORAGE_PERMISSION_REQUEST -> takeImage()
+                CAMERA_PERMISSION_REQUEST -> take(action.type as CaptureType)
+                READ_STORAGE_PERMISSION_REQUEST -> pick(action.type as MimeType)
             }
         } else {
             if(shouldShowRequestPermissionRationale(permissions[0])) {
