@@ -27,11 +27,11 @@ TAKE usage sample
 Activity and Fragment have next extension functions:
 __pickFromGallery(mimeType: MimeType, block: RequestParams.() -> Unit)__ - opens native android picker and returns selected Uri.
 * `mimeType` - mime type of taking file;
-* `block` -  [RequestParams](#request-params)  block.
+* `block` -  [RequestParams](#requestparams)  block.
 
 __takeFromCamera(type: CaptureType,  block: RequestParams.() -> Unit)__ - opens native android camera and returns taken photo/video Uri.
 * `type` - One of `Image` or `Video` capture type;
-* `block` -  [RequestParams](#request-params) block.
+* `block` -  [RequestParams](#requestparams) block.
 
 ## RequestParams
 
