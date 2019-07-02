@@ -5,7 +5,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
 import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.core.os.bundleOf
@@ -13,7 +12,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import com.idapgroup.argumentdelegate.argumentDelegate
 import java.io.File
-import kotlin.reflect.KClass
 
 private const val GALLERY_REQUEST = 101
 private const val CAMERA_REQUEST = 102
@@ -26,27 +24,26 @@ internal class ResultFragment : Fragment() {
     companion object {
         fun newInstance(
             target: Target,
-            action: ImageSource,
-            funName: String,
-            resultClass: KClass<*>,
-            permissionConfig: PermissionConfig?
+            action: Source<*>,
+            callback: Callback,
+            permissionParams: PermissionParams?
         ) = ResultFragment().apply {
             arguments = bundleOf(
                 "target" to target,
                 "action" to action,
-                "funName" to funName,
-                "resultClass" to resultClass.java
+                "callbackBundle" to callback.toBundle()
             )
-            this.permissionConfig = permissionConfig
+            this.permissionParams = permissionParams
         }
     }
 
     private val target: Target by argumentDelegate()
-    private val action: ImageSource by argumentDelegate()
-    private val funName: String by argumentDelegate()
-    private val resultClass: Class<*> by argumentDelegate()
+    private val action: Source<*> by argumentDelegate()
+    private val callbackBundle: Bundle by argumentDelegate()
 
-    private var permissionConfig: PermissionConfig? = null
+    private val callback: Callback by lazy { toCallback(callbackBundle) }
+
+    private var permissionParams: PermissionParams? = null
 
     private var started = false
     private var pendingResult: Any? = null
@@ -68,18 +65,19 @@ internal class ResultFragment : Fragment() {
         super.onStart()
         if (started.not()) {
             started = true
-            when (action) {
-                ImageSource.CAMERA -> takePhoto()
-                ImageSource.GALLERY -> takeImage()
+            when (val a = action) {
+                is Source.Camera -> take(a.type)
+                is Source.Gallery -> pick(a.type)
             }
         } else {
             pendingResult?.let(::handleResultAndFinish)
         }
     }
 
-    private fun takeImage() {
-        if (permissionConfig == null || context!!.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-            pickImage(
+    private fun pick(type: MimeType) {
+        if (permissionParams == null || context!!.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+            pick(
+                type,
                 GALLERY_REQUEST,
                 ::startActivityForResult
             )
@@ -88,10 +86,11 @@ internal class ResultFragment : Fragment() {
         }
     }
 
-    private fun takePhoto() {
+    private fun take(type: CaptureType) {
         if (context!!.isPermissionGranted(Manifest.permission.CAMERA)) {
-            photoFile = takePhoto(
+            photoFile = take(
                 context!!,
+                type,
                 CAMERA_REQUEST,
                 ::startActivityForResult
             )
@@ -103,14 +102,14 @@ internal class ResultFragment : Fragment() {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         if(grantResults.isRequestGranted()) {
             when(requestCode) {
-                CAMERA_PERMISSION_REQUEST -> takePhoto()
-                READ_STORAGE_PERMISSION_REQUEST -> takeImage()
+                CAMERA_PERMISSION_REQUEST -> take(action.type as CaptureType)
+                READ_STORAGE_PERMISSION_REQUEST -> pick(action.type as MimeType)
             }
         } else {
             if(shouldShowRequestPermissionRationale(permissions[0])) {
-                permissionConfig?.onDenied?.invoke()
+                permissionParams?.onDenied?.invoke()
             } else {
-                permissionConfig?.onPermanentlyDenied?.invoke()
+                permissionParams?.onPermanentlyDenied?.invoke()
             }
             finish()
         }
@@ -141,19 +140,8 @@ internal class ResultFragment : Fragment() {
             Target.ACTIVITY -> activity!!
             Target.FRAGMENT -> parentFragment!!
         }
-        val method = target::class.java.getDeclaredMethod(funName, resultClass)
-        method.isAccessible = true
-        method.invoke(target, mapResult(result))
-
+        callback.call(target, result)
         finish()
-    }
-
-    private fun mapResult(result: Any): Any {
-        return if (result is File && resultClass === Uri::class.java) {
-            Uri.fromFile(result)
-        } else {
-            result
-        }
     }
 
     private fun finish() {
