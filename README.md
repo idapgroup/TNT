@@ -24,7 +24,7 @@ dependencies {
 TAKE usage sample
 -------------
 
-Activity and Fragment have next extension functions:
+Activity and Fragment have next extension functions:  
 __pickFromGallery(mimeType: MimeType, block: RequestParams.() -> Unit)__ - opens native android picker and returns selected Uri.
 * `mimeType` - mime type of taking file;
 * `block` -  [RequestParams](#requestparams)  block.
@@ -47,30 +47,30 @@ class ExampleActivity : Activity {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         galleryButton.setOnClickListener {
-			pickFromGallery(MimeType.Image.Any) {
-				callback(func = ::onTaken)
-				permissions(
-					onDenied = {
-						showToast( "Permission denied")
-					},
-					onPermanentlyDenied = {
-						showToast( "Permission permanently denied")
-					}
-            	)
+		pickFromGallery(MimeType.Image.Any) {
+			callback(func = ::onTaken)
+			permissions(
+				onDenied = {
+					showToast( "Permission denied")
+				},
+				onPermanentlyDenied = {
+					showToast( "Permission permanently denied")
+				}
+            		)
         	}
         }
         cameraButton.setOnClickListener {
-			takeFromCamera(CaptureType.Video) {
-				callback(func = ::onTaken)
-				permissions(
-					onDenied = {
-						toast( "Permission denied")
-					},
-					onPermanentlyDenied = {
-						toast( "Permission permanently denied")
-					}
-				)
-			}
+		takeFromCamera(CaptureType.Video) {
+			callback(func = ::onTaken)
+			permissions(
+				onDenied = {
+					toast( "Permission denied")
+				},
+				onPermanentlyDenied = {
+					toast( "Permission permanently denied")
+				}
+			)
+		}
         }
     }
     
