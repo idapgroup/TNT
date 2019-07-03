@@ -5,10 +5,12 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import com.idapgroup.argumentdelegate.argumentDelegate
 import java.io.File
@@ -18,20 +20,36 @@ private const val CAMERA_REQUEST = 102
 private const val CAMERA_PERMISSION_REQUEST = 201
 private const val READ_STORAGE_PERMISSION_REQUEST = 202
 
-@PublishedApi
+typealias Callback<T, R> = T.(R) -> Unit
+
+internal fun addResultFragment(
+    fragmentManager: FragmentManager,
+    target: Target,
+    source: Source<*>,
+    permissions: PermissionParams.() -> Unit,
+    callback: Callback<*, Uri>
+) {
+    val permissionParams = PermissionParams().apply(permissions)
+    val fragment = ResultFragment.newInstance(target, source, callback, permissionParams)
+
+    fragmentManager.beginTransaction()
+        .add(fragment, null)
+        .commit()
+}
+
 internal class ResultFragment : Fragment() {
 
     companion object {
         fun newInstance(
             target: Target,
             action: Source<*>,
-            callback: Callback,
-            permissionParams: PermissionParams?
+            callback: Callback<*, Uri>,
+            permissionParams: PermissionParams
         ) = ResultFragment().apply {
             arguments = bundleOf(
                 "target" to target,
                 "action" to action,
-                "callbackBundle" to callback.toBundle()
+                "callback" to callback
             )
             this.permissionParams = permissionParams
         }
@@ -39,9 +57,7 @@ internal class ResultFragment : Fragment() {
 
     private val target: Target by argumentDelegate()
     private val action: Source<*> by argumentDelegate()
-    private val callbackBundle: Bundle by argumentDelegate()
-
-    private val callback: Callback by lazy { toCallback(callbackBundle) }
+    private val callback: Callback<Any, Uri> by argumentDelegate()
 
     private var permissionParams: PermissionParams? = null
 
@@ -86,7 +102,7 @@ internal class ResultFragment : Fragment() {
         }
     }
 
-    private fun take(type: CaptureType) {
+    private fun take(type: MediaType) {
         if (context!!.isPermissionGranted(Manifest.permission.CAMERA)) {
             photoFile = take(
                 context!!,
@@ -102,7 +118,7 @@ internal class ResultFragment : Fragment() {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         if(grantResults.isRequestGranted()) {
             when(requestCode) {
-                CAMERA_PERMISSION_REQUEST -> take(action.type as CaptureType)
+                CAMERA_PERMISSION_REQUEST -> take(action.type as MediaType)
                 READ_STORAGE_PERMISSION_REQUEST -> pick(action.type as MimeType)
             }
         } else {
@@ -122,7 +138,7 @@ internal class ResultFragment : Fragment() {
         val result = when (requestCode) {
             GALLERY_REQUEST -> data!!.data!!
             CAMERA_REQUEST -> photoFile!!
-            else -> throw  RuntimeException("Are you crazy?")
+            else -> throw  RuntimeException("Unknown request code: $requestCode")
         }
         tryHandleResultAndFinish(result)
     }
@@ -137,10 +153,10 @@ internal class ResultFragment : Fragment() {
 
     private fun handleResultAndFinish(result: Any) {
         val target: Any = when (target) {
-            Target.ACTIVITY -> activity!!
-            Target.FRAGMENT -> parentFragment!!
+            Target.Activity -> activity!!
+            Target.Fragment -> parentFragment!!
         }
-        callback.call(target, result)
+        callback.invoke(target, toUri(result))
         finish()
     }
 
@@ -149,6 +165,14 @@ internal class ResultFragment : Fragment() {
             .remove(this)
             .commit()
     }
+
+    private fun toUri(result: Any): Uri =
+        when(result) {
+            is Uri -> result
+            is File -> Uri.fromFile(result)
+            else -> throw RuntimeException("Result must be Uri or File type")
+        }
+
 }
 
 private fun IntArray.isRequestGranted() = this.getOrNull(0) == PackageManager.PERMISSION_GRANTED

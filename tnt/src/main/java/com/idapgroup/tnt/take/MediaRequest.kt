@@ -11,15 +11,15 @@ import java.io.File
 
 internal fun take(
     context: Context,
-    type: CaptureType,
+    type: MediaType,
     requestCode: Int,
     startActivity: (Intent, requestCode: Int) -> Unit,
     outFile: File? = null
 ): File {
     val file = outFile ?: createTempFile(context, type)
     val intent = when (type) {
-        CaptureType.Image -> Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        CaptureType.Video -> Intent(MediaStore.ACTION_VIDEO_CAPTURE)
+        MediaType.Image -> Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        MediaType.Video -> Intent(MediaStore.ACTION_VIDEO_CAPTURE)
     }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         intent.putExtra(

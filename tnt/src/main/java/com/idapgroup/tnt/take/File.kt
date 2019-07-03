@@ -3,12 +3,12 @@ package com.idapgroup.tnt.take
 import android.content.Context
 import java.io.File
 
-internal fun createTempFile(context: Context, type: CaptureType): File {
+internal fun createTempFile(context: Context, type: MediaType): File {
     val dstDirectory = getTempImageDirectory(context)
     dstDirectory.mkdirs()
     val prefix = when (type) {
-        CaptureType.Image -> "img"
-        CaptureType.Video -> "vid"
+        MediaType.Image -> "img"
+        MediaType.Video -> "vid"
     }
     return File.createTempFile(prefix, ".tmp", dstDirectory)
 }

@@ -1,6 +1,6 @@
 package com.idapgroup.tnt.take
 
-enum class CaptureType {
+enum class MediaType {
     Image,
     Video
 }

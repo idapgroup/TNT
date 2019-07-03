@@ -8,10 +8,10 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.idapgroup.tnt.pickFromGallery
-import com.idapgroup.tnt.take.CaptureType
+import com.idapgroup.tnt.take
+import com.idapgroup.tnt.take.MediaType
 import com.idapgroup.tnt.take.MimeType
-import com.idapgroup.tnt.takeFromCamera
+import com.idapgroup.tnt.take.Source
 import com.idapgroup.tnt.transform.asDataSource
 import com.idapgroup.tnt.transform.resize
 import com.idapgroup.tnt.transform.transformAsBitmap
@@ -45,71 +45,63 @@ class SampleFragment : Fragment() {
             onPickVideo()
         }
         takePhoto.setOnClickListener {
-            onTakePhoto()
+            onTakePhoto(3)
         }
         takeVideo.setOnClickListener {
             onTakeVideo()
         }
     }
 
-    private fun onPickVideo() {
-        pickFromGallery(MimeType.Video.Any) {
-            callback(func = ::onVideoTaken, param = Date())
-            permissions(
-                onDenied = {
-                    showToast( "Permission denied")
-                },
-                onPermanentlyDenied = {
-                    showToast( "Permission permanently denied")
-                }
-            )
-        }
-    }
-
     private fun onPickImage() {
-        pickFromGallery(MimeType.Image.Any) {
-            callback(func = ::onTaken, param = Date())
-            permissions(
-                onDenied = {
-                    showToast( "Permission denied")
-                },
-                onPermanentlyDenied = {
-                    showToast( "Permission permanently denied")
-                }
-            )
+        take(
+            source = Source.Gallery(MimeType.Image.Any),
+            permissions = {
+                onDenied {  showToast( "Permission denied") }
+                onPermanentlyDenied { showToast( "Permission permanently denied") }
+            }
+        ) { uri ->
+            onImageTaken(uri, 5)
         }
     }
 
-    private fun onTakePhoto() {
-        takeFromCamera(CaptureType.Image) {
-            callback(func = ::onTaken, param = Date())
-            permissions(
-                onDenied = {
-                    showToast( "Permission denied")
-                },
-                onPermanentlyDenied = {
-                    showToast( "Permission permanently denied")
-                }
-            )
-        }
+    private fun onPickVideo() {
+        take(
+            source = Source.Gallery(MimeType.Video.Any),
+            permissions = {
+                onDenied {  showToast( "Permission denied") }
+                onPermanentlyDenied { showToast( "Permission permanently denied") }
+            },
+            callback = SampleFragment::onVideoTaken
+        )
+    }
+
+    private fun onTakePhoto(position: Int) {
+        take(
+            source = Source.Camera(MediaType.Image),
+            permissions = {
+                onDenied {  showToast( "Permission denied") }
+                onPermanentlyDenied { showToast( "Permission permanently denied") }
+            },
+            callback = { uri: Uri ->
+                onImageTaken(uri, position)
+            }
+        )
     }
 
     private fun onTakeVideo() {
-        takeFromCamera(CaptureType.Video) {
-            callback(func = ::onVideoTaken, param = Date())
-            permissions(
-                onDenied = {
-                    showToast( "Permission denied")
-                },
-                onPermanentlyDenied = {
-                    showToast( "Permission permanently denied")
-                }
-            )
+        take(
+            source = Source.Camera(MediaType.Video),
+            permissions = {
+                onDenied {  showToast( "Permission denied") }
+                onPermanentlyDenied { showToast( "Permission permanently denied") }
+            }
+        ) {
+            onVideoTaken(it)
         }
     }
 
-    private fun onTaken(uri: Uri, date: Date) {
-        Toast.makeText(context, "${date.hours}:${date.minutes}:${date.seconds}", Toast.LENGTH_LONG).show()
+    private fun onImageTaken(uri: Uri, position: Int) {
+        Toast.makeText(context, "Position: $position", Toast.LENGTH_LONG).show()
 
         val bitmap = uri.asDataSource(context!!)
             .transformAsBitmap {
@@ -118,8 +110,8 @@ class SampleFragment : Fragment() {
         imageView.setImageBitmap(bitmap)
     }
 
-    private fun onVideoTaken(uri: Uri, date: Date) {
-        Toast.makeText(context, "$uri", Toast.LENGTH_LONG).show()
+    private fun onVideoTaken(uri: Uri) {
+        Toast.makeText(context, "Video: $uri", Toast.LENGTH_LONG).show()
     }
 
     private fun showToast(msg: String) {
