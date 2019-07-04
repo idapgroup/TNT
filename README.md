@@ -49,11 +49,12 @@ class ExampleActivity : FragmentActivity() {
 }
 ```
 
-###Advanced usage
+### Advanced usage
+
 "As a developer, I don't want to write boilerplate code for permissions or saving related data to instance state."
 
 Functions that were described above are just an extension functions for `take`.  
-		__take(  source: Source<*>,  permissions: PermissionParams.() -> Unit = {},  callback: F.(Uri) -> Unit )__
+__take(source: Source<*>,  permissions: PermissionParams.() -> Unit = {},  callback: F.(Uri) -> Unit)__
 
 Where:
 
@@ -91,7 +92,7 @@ class ExampleActivity : FragmentActivity() {
 }
 ```
 
-__Keep in mind: when you are trying to use local variables inside callback function it must be primitives or implements Serializable interface. Parcelable isn't supported yet.__
+#### Keep in mind: when you are trying to use local variables inside callback function it must be primitives or implements Serializable interface. Parcelable isn't supported yet.
 
 ```kotlin
 open class User(var image: Uri? = null)
