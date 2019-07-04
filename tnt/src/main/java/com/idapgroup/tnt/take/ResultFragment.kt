@@ -104,7 +104,7 @@ internal class ResultFragment : Fragment() {
 
     private fun take(type: MediaType) {
         if (context!!.isPermissionGranted(Manifest.permission.CAMERA)) {
-            photoFile = take(
+            photoFile = capture(
                 context!!,
                 type,
                 CAMERA_REQUEST,

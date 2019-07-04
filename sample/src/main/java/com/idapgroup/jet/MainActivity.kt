@@ -12,11 +12,11 @@ import com.idapgroup.tnt.take
 import com.idapgroup.tnt.take.MediaType
 import com.idapgroup.tnt.take.MimeType
 import com.idapgroup.tnt.take.Source
+import com.idapgroup.tnt.takeImageFromGallery
 import com.idapgroup.tnt.transform.asDataSource
 import com.idapgroup.tnt.transform.resize
 import com.idapgroup.tnt.transform.transformAsBitmap
 import kotlinx.android.synthetic.main.screen_sample.*
-import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -52,15 +52,10 @@ class SampleFragment : Fragment() {
         }
     }
 
+
     private fun onPickImage() {
-        take(
-            source = Source.Gallery(MimeType.Image.Any),
-            permissions = {
-                onDenied {  showToast( "Permission denied") }
-                onPermanentlyDenied { showToast( "Permission permanently denied") }
-            }
-        ) { uri ->
-            onImageTaken(uri, 5)
+        takeImageFromGallery {
+            onImageTaken(it, 5)
         }
     }
 

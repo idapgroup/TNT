@@ -9,7 +9,7 @@ import android.provider.MediaStore
 import androidx.core.content.FileProvider
 import java.io.File
 
-internal fun take(
+internal fun capture(
     context: Context,
     type: MediaType,
     requestCode: Int,
