@@ -52,7 +52,6 @@ class SampleFragment : Fragment() {
         }
     }
 
-
     private fun onPickImage() {
         takeImageFromGallery {
             onImageTaken(it, 5)
@@ -76,11 +75,11 @@ class SampleFragment : Fragment() {
             permissions = {
                 onDenied {  showToast( "Permission denied") }
                 onPermanentlyDenied { showToast( "Permission permanently denied") }
-            },
-            callback = { uri: Uri ->
+            }
+        ) { uri: Uri ->
                 onImageTaken(uri, position)
             }
-        )
+
     }
 
     private fun onTakeVideo() {

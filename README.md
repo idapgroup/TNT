@@ -1,11 +1,11 @@
 Take And Transform
 ============
-Library created for simple taking images/photos/videos from gallery or camera source and then apply transoformations such as: crop, fit, rotate etc. Based on reflection under the hood.
+Library created for simple taking images/photos/videos from gallery or camera source and then apply transformations such as crop, fit, rotate, etc.
 
 Download
 --------
 
-[ ![Download](https://api.bintray.com/packages/idapgroup/kotlin/TNT/images/download.svg?version=2.0.1) ](https://bintray.com/idapgroup/kotlin/TNT/2.0.1/link)
+[ ![Download](https://api.bintray.com/packages/idapgroup/kotlin/TNT/images/download.svg?version=3.0.0) ](https://bintray.com/idapgroup/kotlin/TNT/3.0.0/link)
 
 Add repository to your root `build.gradle`
 
@@ -24,64 +24,96 @@ dependencies {
 TAKE usage sample
 -------------
 
-Activity and Fragment have next extension functions:  
-__pickFromGallery(mimeType: MimeType, block: RequestParams.() -> Unit)__ - opens native android picker and returns selected Uri.
-* `mimeType` - mime type of taking file;
-* `block` -  [RequestParams](#requestparams)  block.
+Activity and Fragment have the next extension functions for most common cases:  
+* __takeImageFromGallery__, __takeVideoFromGallery__ -  opens android picker and returns taken photo/video Uri.  
 
-__takeFromCamera(type: CaptureType,  block: RequestParams.() -> Unit)__ - opens native android camera and returns taken photo/video Uri.
-* `type` - One of `Image` or `Video` capture type;
-* `block` -  [RequestParams](#requestparams) block.
-
-## RequestParams
-
-Builder function for additional picking/taking options.
-
-**callback(func: KFunction1<Uri, Unit>)** - takes result receiver, member method of target component.
-
-**permissions(onDenied: Action? = null, onPermanentlyDenied: Action? = null)** - permissions result handler.
+* __takeImageFromCamera__, __takeVideoFromCamera__  -  opens android camera and returns captured photo/video Uri.  
 
 ```kotlin
-class ExampleActivity : Activity {
-    
+class ExampleActivity : FragmentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         galleryButton.setOnClickListener {
-		pickFromGallery(MimeType.Image.Any) {
-			callback(func = ::onTaken)
-			permissions(
-				onDenied = {
-					showToast( "Permission denied")
-				},
-				onPermanentlyDenied = {
-					showToast( "Permission permanently denied")
-				}
-            		)
-        	}
+            takeImageFromGallery {
+                proccessImageUri(it)
+            }
         }
         cameraButton.setOnClickListener {
-		takeFromCamera(CaptureType.Video) {
-			callback(func = ::onTaken)
-			permissions(
-				onDenied = {
-					toast( "Permission denied")
-				},
-				onPermanentlyDenied = {
-					toast( "Permission permanently denied")
-				}
-			)
-		}
+            takeVideoFromCamera {
+                proccessVideoUri(it)
+            }
         }
-    }
-    
-    fun onTaken(uri: Uri) {
-        // original uri of file
     }
 
 }
 ```
 
-__Remember: Use only member functions of Activity/Fragment.__
+###Advanced usage
+"As a developer, I don't want to write boilerplate code for permissions or saving related data to instance state."
+
+Functions that were described above are just an extension functions for `take`.  
+		__take(  source: Source<*>,  permissions: PermissionParams.() -> Unit = {},  callback: F.(Uri) -> Unit )__
+
+Where:
+
+*  __source__ -  one of Gallery(MimeType) or Camera(MediaType);  
+* __permission__ - dispatches permission denied events ; 
+*  __callback__  - receiver for selected data Uri.
+
+```kotlin
+class ExampleActivity : FragmentActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        galleryButton.setOnClickListener {
+            take(
+                source = Source.Gallery(MimeType.Video.Any),
+                permissions = {
+                    onDenied { showToast("Permission denied") }
+                    onPermanentlyDenied { showToast("Permission permanently denied") }
+                }) {
+                proccessVideoUri(it)
+            }
+        }
+        cameraButton.setOnClickListener {
+            take(
+                source = Source.Camera(MediaType.Image),
+                permissions = {
+                    onDenied { showToast("Permission denied") }
+                    onPermanentlyDenied { showToast("Permission permanently denied") }
+                }) {
+                proccessImageUri(it)
+            }
+        }
+    }
+
+}
+```
+
+__Keep in mind: when you are trying to use local variables inside callback function it must be primitives or implements Serializable interface. Parcelable isn't supported yet.__
+
+```kotlin
+open class User(var image: Uri? = null)
+
+class SerializableUser : User(), Serializable
+
+class MyFragment : Fragment() {
+    
+    val user = User()
+    
+    fun takePhotoForUser() {
+        val localUser = User()
+		val localSerializableUser = SerializableUser()
+        takeImageFromGallery { 
+            user.image = it // OK!
+			localSerializableUser.image = it // OK!
+            localUser.image = it // Wrong!! Runtime exception
+        }
+    }
+    
+}
+```
 
 TRANSFORM usage sample
 -------------
@@ -95,7 +127,7 @@ Tramsormation functions:
 * __background(color: Int)__ - set bitmap background for `fitStart`, `fitCenter`, `fitEnd` modes
 * __blur(radius, sampling)__
 * __colorFilter(color)__
-(#some)
+
 ```kotlin
 val bitmap = file.transformAsBitmap {
     resize(100, 200, cropEnd)
