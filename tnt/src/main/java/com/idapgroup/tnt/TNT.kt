@@ -5,7 +5,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.idapgroup.tnt.take.*
 import com.idapgroup.tnt.take.Target
-import com.idapgroup.tnt.util.assertSerializable
+import com.idapgroup.tnt.take.assertSerializable
 
 /**
  * Calls native android picker/camera and returns Uri into callback

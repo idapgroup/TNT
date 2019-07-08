@@ -29,8 +29,9 @@ internal fun addResultFragment(
     permissions: PermissionParams.() -> Unit,
     callback: Callback<*, Uri>
 ) {
-    val permissionParams = PermissionParams().apply(permissions)
-    val fragment = ResultFragment.newInstance(target, source, callback, permissionParams)
+    val fragment = ResultFragment.newInstance(target, source, callback)
+    // Not serializable
+    fragment.permissionParams = PermissionParams().apply(permissions)
 
     fragmentManager.beginTransaction()
         .add(fragment, null)
@@ -43,15 +44,13 @@ internal class ResultFragment : Fragment() {
         fun newInstance(
             target: Target,
             action: Source,
-            callback: Callback<*, Uri>,
-            permissionParams: PermissionParams
+            callback: Callback<*, Uri>
         ) = ResultFragment().apply {
             arguments = bundleOf(
                 "target" to target,
                 "action" to action,
                 "callback" to callback
             )
-            this.permissionParams = permissionParams
         }
     }
 
@@ -59,7 +58,7 @@ internal class ResultFragment : Fragment() {
     private val action: Source by argumentDelegate()
     private val callback: Callback<Any, Uri> by argumentDelegate()
 
-    private var permissionParams: PermissionParams? = null
+    internal var permissionParams: PermissionParams? = null
 
     private var started = false
     private var pendingResult: Any? = null

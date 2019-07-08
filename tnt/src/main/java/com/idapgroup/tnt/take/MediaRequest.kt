@@ -17,10 +17,12 @@ internal fun capture(
     outFile: File? = null
 ): File {
     val file = outFile ?: createTempFile(context, type)
-    val intent = when (type) {
-        MediaType.Image -> Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        MediaType.Video -> Intent(MediaStore.ACTION_VIDEO_CAPTURE)
+    val action = when (type) {
+        MediaType.Image -> MediaStore.ACTION_IMAGE_CAPTURE
+        MediaType.Video -> MediaStore.ACTION_VIDEO_CAPTURE
     }
+    val intent = Intent(action)
+
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         intent.putExtra(
             MediaStore.EXTRA_OUTPUT,

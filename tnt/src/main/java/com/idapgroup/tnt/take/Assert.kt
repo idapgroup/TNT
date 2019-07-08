@@ -1,11 +1,10 @@
-package com.idapgroup.tnt.util
+package com.idapgroup.tnt.take
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import java.io.ByteArrayOutputStream
 import java.io.NotSerializableException
 import java.io.ObjectOutputStream
-
 
 internal fun assertSerializable(context: Context, any: Any) {
     val isDebuggable = 0 != context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE
