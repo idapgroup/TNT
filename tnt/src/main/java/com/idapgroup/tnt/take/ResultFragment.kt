@@ -25,7 +25,7 @@ typealias Callback<T, R> = T.(R) -> Unit
 internal fun addResultFragment(
     fragmentManager: FragmentManager,
     target: Target,
-    source: Source<*>,
+    source: Source,
     permissions: PermissionParams.() -> Unit,
     callback: Callback<*, Uri>
 ) {
@@ -42,7 +42,7 @@ internal class ResultFragment : Fragment() {
     companion object {
         fun newInstance(
             target: Target,
-            action: Source<*>,
+            action: Source,
             callback: Callback<*, Uri>,
             permissionParams: PermissionParams
         ) = ResultFragment().apply {
@@ -56,7 +56,7 @@ internal class ResultFragment : Fragment() {
     }
 
     private val target: Target by argumentDelegate()
-    private val action: Source<*> by argumentDelegate()
+    private val action: Source by argumentDelegate()
     private val callback: Callback<Any, Uri> by argumentDelegate()
 
     private var permissionParams: PermissionParams? = null
@@ -118,8 +118,8 @@ internal class ResultFragment : Fragment() {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         if(grantResults.isRequestGranted()) {
             when(requestCode) {
-                CAMERA_PERMISSION_REQUEST -> take(action.type as MediaType)
-                READ_STORAGE_PERMISSION_REQUEST -> pick(action.type as MimeType)
+                CAMERA_PERMISSION_REQUEST -> take((action as Source.Camera).type)
+                READ_STORAGE_PERMISSION_REQUEST -> pick((action as Source.Gallery).type)
             }
         } else {
             if(shouldShowRequestPermissionRationale(permissions[0])) {

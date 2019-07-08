@@ -14,7 +14,7 @@ import com.idapgroup.tnt.util.assertSerializable
  * @param callback - receiver for selected data Uri
  */
 fun <F: Fragment> F.take(
-    source: Source<*>,
+    source: Source,
     permissions: PermissionParams.() -> Unit = {},
     callback: F.(Uri) -> Unit
 ) {
@@ -35,7 +35,7 @@ fun <F: Fragment> F.take(
  * @param callback - receiver for selected data Uri
  */
 fun <F: FragmentActivity> F.take(
-    source: Source<*>,
+    source: Source,
     permissions: PermissionParams.() -> Unit = {},
     callback: F.(Uri) -> Unit
 ) {
