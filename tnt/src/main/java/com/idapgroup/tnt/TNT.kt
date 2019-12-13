@@ -34,15 +34,15 @@ fun <F: Fragment> F.take(
  * @param permissions - dispatches permission denied events
  * @param callback - receiver for selected data Uri
  */
-fun <F: FragmentActivity> F.take(
+fun <A: FragmentActivity> A.take(
     source: Source,
     permissions: PermissionParams.() -> Unit = {},
-    callback: F.(Uri) -> Unit
+    callback: A.(Uri) -> Unit
 ) {
     assertSerializable(this, callback)
     addResultFragment(
         fragmentManager = supportFragmentManager,
-        target = Target.Fragment,
+        target = Target.Activity,
         source = source,
         permissions = permissions,
         callback = callback
@@ -80,27 +80,27 @@ fun <F: Fragment> F.takeVideoFromCamera(callback: F.(Uri) -> Unit) {
 /**
  * Takes image from android gallery and invokes callback with selected Uri
  */
-fun <F: FragmentActivity> F.takeImageFromGallery(callback: F.(Uri) -> Unit) {
+fun <A: FragmentActivity> A.takeImageFromGallery(callback: A.(Uri) -> Unit) {
     take(Source.Gallery(MimeType.Image.Any), {}, callback)
 }
 
 /**
  * Takes video from android gallery and invokes callback with selected Uri
  */
-fun <F: FragmentActivity> F.takeVideoFromGallery(callback: F.(Uri) -> Unit) {
+fun <A: FragmentActivity> A.takeVideoFromGallery(callback: A.(Uri) -> Unit) {
     take(Source.Gallery(MimeType.Video.Any), {}, callback)
 }
 
 /**
  * Takes image from android native camera and invokes callback with captured Uri
  */
-fun <F: FragmentActivity> F.takeImageFromCamera(callback: F.(Uri) -> Unit) {
+fun <A: FragmentActivity> A.takeImageFromCamera(callback: A.(Uri) -> Unit) {
     take(Source.Camera(MediaType.Image), {}, callback)
 }
 
 /**
  * Takes video from android native camera and invokes callback with captured Uri
  */
-fun <F: FragmentActivity> F.takeVideoFromCamera(callback: F.(Uri) -> Unit) {
+fun <A: FragmentActivity> A.takeVideoFromCamera(callback: A.(Uri) -> Unit) {
     take(Source.Camera(MediaType.Video), {}, callback)
 }

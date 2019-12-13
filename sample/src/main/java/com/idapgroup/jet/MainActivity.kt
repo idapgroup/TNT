@@ -1,5 +1,6 @@
 package com.idapgroup.jet
 
+import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -29,6 +30,22 @@ class MainActivity : AppCompatActivity() {
                 .replace(R.id.fragmentContainer, SampleFragment(), null)
                 .commit()
         }
+        onPickVideo()
+    }
+
+    private fun onPickVideo() {
+        take(
+            source = Source.Gallery(MimeType.Image.Any),
+            permissions = {
+                onDenied {  showToast( "Permission denied") }
+                onPermanentlyDenied { showToast( "Permission permanently denied") }
+            },
+            callback = MainActivity::onVideoTaken
+        )
+    }
+
+    private fun onVideoTaken(uri: Uri) {
+        Toast.makeText(this, "Video: $uri", Toast.LENGTH_LONG).show()
     }
 }
 
@@ -77,9 +94,8 @@ class SampleFragment : Fragment() {
                 onPermanentlyDenied { showToast( "Permission permanently denied") }
             }
         ) { uri: Uri ->
-                onImageTaken(uri, position)
-            }
-
+            onImageTaken(uri, position)
+        }
     }
 
     private fun onTakeVideo() {
@@ -95,7 +111,7 @@ class SampleFragment : Fragment() {
     }
 
     private fun onImageTaken(uri: Uri, position: Int) {
-        Toast.makeText(context, "Position: $position", Toast.LENGTH_LONG).show()
+        showToast("Position: $position")
 
         val bitmap = uri.asDataSource(context!!)
             .transformAsBitmap {
@@ -105,10 +121,14 @@ class SampleFragment : Fragment() {
     }
 
     private fun onVideoTaken(uri: Uri) {
-        Toast.makeText(context, "Video: $uri", Toast.LENGTH_LONG).show()
+        showToast("Video: $uri")
     }
 
-    private fun showToast(msg: String) {
-        Toast.makeText(context!!, msg, Toast.LENGTH_LONG).show()
+    fun showToast(msg: String) {
+        context?.showToast(msg)
     }
+}
+
+private fun Context.showToast(msg: String) {
+    Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
 }
