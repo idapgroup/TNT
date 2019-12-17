@@ -5,7 +5,7 @@ Library created for simple taking images/photos/videos from gallery or camera so
 Download
 --------
 
-[ ![Download](https://api.bintray.com/packages/idapgroup/kotlin/TNT/images/download.svg?version=3.0.0) ](https://bintray.com/idapgroup/kotlin/TNT/3.0.0/link)
+[ ![Download](https://api.bintray.com/packages/idapgroup/kotlin/TNT/images/download.svg?version=3.0.1) ](https://bintray.com/idapgroup/kotlin/TNT/3.0.1/link)
 
 Add repository to your root `build.gradle`
 
